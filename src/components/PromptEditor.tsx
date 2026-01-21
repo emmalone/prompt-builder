@@ -72,7 +72,7 @@ export function PromptEditor({ onAddToStandards }: PromptEditorProps) {
     // Ralph Loop best practice modifiers
     const ralphModifiers = `
 ## Loop Control
-- Maximum iterations: 10
+- Maximum iterations: 25 (safety limit only - stop early when done)
 - Stop immediately when all requirements are met
 - Do NOT restart or repeat completed work
 - If blocked or uncertain, ask for clarification instead of looping
