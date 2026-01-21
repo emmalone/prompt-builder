@@ -195,8 +195,8 @@ When ALL requirements are fully implemented and verified:
 
         {/* Right Column - Constructed Prompt & Ralph Ready */}
         <div className="flex-1 flex flex-col min-h-0 gap-4">
-          {/* Constructed Prompt Section */}
-          <div className="flex-1 flex flex-col min-h-0">
+          {/* Constructed Prompt Section - 3/4 of space */}
+          <div className="flex-[3] flex flex-col min-h-0">
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-gray-700">Constructed Prompt</label>
               <div className="flex gap-2">
@@ -229,8 +229,8 @@ When ALL requirements are fully implemented and verified:
             />
           </div>
 
-          {/* Ralph Ready Section */}
-          <div className="flex flex-col min-h-0" style={{ maxHeight: '30%' }}>
+          {/* Ralph Ready Section - 1/4 of space (half of success criteria) */}
+          <div className="flex-1 flex flex-col min-h-0">
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-gray-700">Ralph Loop Ready</label>
               <div className="flex gap-2">
