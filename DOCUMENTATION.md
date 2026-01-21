@@ -98,6 +98,55 @@ npm install
 npm run dev
 ```
 
+**Running on a Custom Port:**
+```bash
+npm run dev -- -p 3001
+```
+
+### Running Multiple Next.js Apps Simultaneously
+
+When running multiple Next.js applications at the same time, each needs its own port:
+
+**Option 1: Different Ports (simplest)**
+```bash
+# Terminal 1
+cd /path/to/app1 && npm run dev -- -p 3000
+
+# Terminal 2
+cd /path/to/app2 && npm run dev -- -p 3001
+
+# Terminal 3
+cd /path/to/app3 && npm run dev -- -p 3002
+```
+
+**Option 2: Background Processes (single terminal)**
+```bash
+cd /path/to/app1 && npm run dev -- -p 3000 &
+cd /path/to/app2 && npm run dev -- -p 3001 &
+cd /path/to/app3 && npm run dev -- -p 3002 &
+```
+Stop all with: `pkill -f "next dev"`
+
+**Option 3: Using `concurrently` (recommended)**
+```bash
+# Install once globally
+npm install -g concurrently
+
+# Run multiple apps
+concurrently \
+  "cd /path/to/app1 && npm run dev -- -p 3000" \
+  "cd /path/to/app2 && npm run dev -- -p 3001"
+```
+
+**Option 4: Package.json Script (for monorepos)**
+```json
+{
+  "scripts": {
+    "dev:all": "concurrently \"npm run dev -w app1\" \"npm run dev -w app2\""
+  }
+}
+```
+
 ## Work Completed
 
 ### Core Features
