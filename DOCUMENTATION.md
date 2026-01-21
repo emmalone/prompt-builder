@@ -4,7 +4,7 @@
 Prompt Builder & Organizer is a web application for organizing and composing prompts for AI coding tools like Claude Code. It helps users manage multiple projects, each containing reusable prompt templates with Requirements and Success Criteria sections.
 
 ## Current Status
-**MVP Complete** - All core features implemented and working. Application is stable and ready for use.
+**MVP Complete** - All core features implemented and working. Application is stable and ready for use. Data persisted in SQLite database.
 
 ## Architecture Overview
 ```
@@ -13,39 +13,84 @@ Prompt Builder & Organizer is a web application for organizing and composing pro
 ├─────────────────────────────────────────────────────┤
 │  Frontend (React 19 + Tailwind CSS v4)              │
 │  ├── Sidebar (projects + prompts list)              │
-│  ├── PromptEditor (requirements + success criteria) │
+│  ├── PromptEditor (two-column layout)               │
+│  │   ├── Left: Requirements + Success Criteria      │
+│  │   └── Right: Constructed Prompt preview          │
 │  └── TemplatesPanel (collapsible, right side)       │
+│      ├── Template buttons with Add All              │
+│      ├── Add to Standards workflow                  │
+│      ├── Manage Standards (edit/delete)             │
+│      └── Export JSON                                │
 ├─────────────────────────────────────────────────────┤
 │  State Management (React Context)                   │
 │  └── AppContext (projects, prompts, templates)      │
+│      └── API calls for persistence                  │
 ├─────────────────────────────────────────────────────┤
-│  Persistence (localStorage)                         │
-│  └── storage.ts utilities                           │
+│  API Routes (/api/*)                                │
+│  ├── /state - GET all projects and templates        │
+│  ├── /projects - POST, PUT, DELETE                  │
+│  ├── /prompts - POST, PUT, DELETE                   │
+│  ├── /templates - GET, POST, PUT, DELETE            │
+│  └── /export - GET JSON export                      │
 ├─────────────────────────────────────────────────────┤
-│  Browser APIs                                       │
-│  ├── Web Speech API (dictation)                     │
-│  └── Clipboard API (export)                         │
+│  Database (SQLite via better-sqlite3)               │
+│  └── data/prompts.db                                │
+│      ├── projects (id, name, timestamps)            │
+│      ├── prompts (id, project_id, name, content)    │
+│      └── templates (id, name, content, type, default)│
 └─────────────────────────────────────────────────────┘
 ```
 
 **Data Flow:**
-1. User actions dispatch to AppContext reducer
-2. State updates trigger localStorage save
-3. On load, state hydrates from localStorage
-4. Default templates injected if missing
+1. User actions dispatch to AppContext
+2. Context makes API calls to persist changes
+3. API routes interact with SQLite database
+4. UI updates optimistically for responsiveness
+5. Default templates auto-inserted on first run
 
 ## Key Decisions
-- **localStorage over database:** Simplicity for single-user local tool; no backend required
-- **React Context over Redux:** Sufficient for app complexity; reduces dependencies
-- **Web Speech API for dictation:** Native browser support, no third-party services
-- **Tailwind CSS v4:** Modern styling with @source directives for component scanning
-- **Dark mode by default:** Better for developers who use the tool alongside code editors
+
+- **SQLite over localStorage:**
+  - **Rationale:** Enables larger datasets, proper queries, data portability, and server-side persistence
+  - **Implementation:** better-sqlite3 with WAL mode for performance
+
+- **API Routes for all data operations:**
+  - **Rationale:** Clean separation of concerns, enables future features like multi-user support
+  - **Pattern:** RESTful endpoints (GET/POST/PUT/DELETE)
+
+- **Two-column editor layout:**
+  - **Rationale:** Requirements and Success Criteria visible together, with live Constructed Prompt preview
+  - **Implementation:** Flex layout with stacked inputs on left, preview on right
+
+- **Template duplicate detection:**
+  - **Rationale:** Prevent accidentally adding the same template twice
+  - **Implementation:** Templates show checkmark and disable when already in prompt
+
+- **Removed dictation feature:**
+  - **Rationale:** macOS native dictation features are sufficient; reduced complexity
+
+- **React Context over Redux:**
+  - **Rationale:** Sufficient for app complexity; reduces dependencies
+
+- **Tailwind CSS v4:**
+  - **Rationale:** Modern styling with @source directives for component scanning
+
+- **Dark mode by default:**
+  - **Rationale:** Better for developers who use the tool alongside code editors
 
 ## Configuration & Environment
+
 - **Node.js:** 18+ required
-- **No environment variables:** Self-contained, runs entirely in browser
-- **Browser requirements:** Modern browser with localStorage and optional Web Speech API support
+- **No environment variables:** Self-contained
+- **Database:** Auto-created at `data/prompts.db` on first run
 - **Port:** Default 3000 (configurable via Next.js)
+
+**Dependencies:**
+- next: 16.1.4
+- react: 19.2.3
+- better-sqlite3: ^12.6.2
+- uuid: ^13.0.0
+- tailwindcss: ^4
 
 **Setup:**
 ```bash
@@ -54,31 +99,63 @@ npm run dev
 ```
 
 ## Work Completed
+
+### Core Features
 - [x] Project CRUD (create, select, delete)
 - [x] Prompt CRUD within projects
-- [x] Dual textarea editor (Requirements + Success Criteria)
-- [x] Standard templates with defaults
-- [x] Add to Standards (text selection → new template)
-- [x] Dictation support via Web Speech API
-- [x] Export to clipboard (formatted output)
-- [x] localStorage persistence
-- [x] Dark mode UI
+- [x] Two-column editor layout (inputs + preview)
+- [x] Update Prompt button to generate combined output
+- [x] Copy to Clipboard functionality
+
+### Templates System
+- [x] Standard templates with 4 defaults
+- [x] Add to Standards (select text → name → save)
+- [x] Manage Standards panel (edit/delete templates)
+- [x] Template type categorization (requirements/success-criteria)
+- [x] Add All button per template section
+- [x] Duplicate detection (checkmark + disabled state)
+- [x] Default template protection (cannot delete)
+
+### Data Layer
+- [x] SQLite database with better-sqlite3
+- [x] API routes for all CRUD operations
+- [x] Export to JSON (projects + custom templates)
+- [x] WAL mode for database performance
+- [x] Foreign key cascade delete
+
+### UI/UX
+- [x] Dark mode sidebar
 - [x] Collapsible templates panel
 - [x] Inline prompt renaming
+- [x] Blue text on light background (readable)
 - [x] Zero linter errors
 
 ## Open Items / Next Steps
-- [ ] Template editing (currently only add/delete)
+
+- [ ] Import from JSON (restore backups)
 - [ ] Prompt search/filter
 - [ ] Template categories/tags
-- [ ] Import/export all data as JSON
 - [ ] Keyboard shortcuts
 - [ ] Mobile responsive improvements
+- [ ] Drag-and-drop prompt reordering
 
 ## Change Log
 
-### 2026-01-21
+### 2026-01-21 (Update)
+- **Documentation recreated** to reflect current architecture
+- Major changes since initial doc:
+  - Migrated from localStorage to SQLite database
+  - Added 5 API routes (state, projects, prompts, templates, export)
+  - Removed Web Speech API dictation feature
+  - Added Manage Standards panel (edit/delete templates)
+  - Added Export to JSON functionality
+  - Added "Add All" buttons for template sections
+  - Added duplicate detection for templates
+  - Changed to two-column editor layout with Constructed Prompt preview
+  - Updated .gitignore with additional entries
+- GitHub repository created: https://github.com/emmalone/prompt-builder
+
+### 2026-01-21 (Initial)
 - Initial project creation
-- All MVP features implemented
-- Documentation created
-- Build verified with zero linter errors
+- MVP features implemented
+- Initial documentation created
